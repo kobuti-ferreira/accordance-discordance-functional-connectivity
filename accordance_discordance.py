@@ -6,7 +6,7 @@ import numpy as np
 ###########################################################################################################
 
 
-## calc_AccordDisc : calculate Accordance and Discordance as in Meskaldji et al 2016 
+## calc_AccordDisc : calculate Accordance and Discordance as in Meskaldji et al 2016 (NeuroImage: Clinical)
 # Input is:
 # 1) a Pandas DataFrame where each column is a time series and each row is a time point
 # 2) an optional threshold used to binarie the time series (this is optional;
@@ -46,14 +46,21 @@ def calc_AccordDisc(ts, quantileThreshold = 0.8, verbose=True):
     # sum of scalar products of ul and ll
     sum_scalar_product_ul_ll = scalar_product_ul_ts + scalar_product_ll_ts
     # square root of the sum of scalar products of ul and ll
-    sqrt_sum_scalar_product_ul_ll = np.sqrt(sum_scalar_product_ul_ll)
+    sigma_all = np.sqrt(sum_scalar_product_ul_ll)
+    
+    ## Prepare all possible denominators
+    # denominator of paired time series i and j = sigma_all[i] * sigma_all[j]
+    # so to get all possible denominators, calculate the outer product of
+    #      sqrt_sum_scalar_product_ul_ll by itself
+    # (the outer product of a vector by itself gives a square matrix with 
+    #    the product of all possible combinations of pairs of elements from the vector
+    #    so that element i,j from the resulting matrix is the product of element_i * element_j of the vector
+    denominators_all = np.outer(sigma_all, sigma_all)    
     
     ## loop through all possible pairs of regions 
     for i in range(numTS):
-        denominator_i = sqrt_sum_scalar_product_ul_ll[i]
         for j in range(numTS):
-            denominator_j = sqrt_sum_scalar_product_ul_ll[j]
-            denominator = denominator_i * denominator_j
+            denominator = denominators_all[i, j]
             accordance = ( (ul_ts[:,i] @ ul_ts[:,j]) + (ll_ts[:,i] @ ll_ts[:,j]) ) / denominator
             discordance = ( (ul_ts[:,i] @ ll_ts[:,j]) + (ll_ts[:,i] @ ul_ts[:,j]) ) / denominator
             accordanceDF.iloc[i, j] = accordance
