@@ -9,7 +9,14 @@
 
 import numpy as np
 
-def calc_AccordDisc(ts, quantileThreshold = 0.8, verbose=True):    
+def calc_AccordDisc(ts, quantileThreshold = 0.8, verbose=True):
+    ## Median-center and normalize the time-series as in Meskaldji et al 2016
+    # Median-centering
+    ts = np.subtract(ts, np.median(ts, axis=0))
+    # Normalize by dividing by the median absolute deviation (MAD)
+    mad = np.median(np.abs(ts - np.median(ts, axis=0)), axis=0)
+    ts = np.divide(ts, mad)
+    
     if verbose: print("Calculating Accordance and Discordance")
     
     numTimePoints, numTS = ts.shape
