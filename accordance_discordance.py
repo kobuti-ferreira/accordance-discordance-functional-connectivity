@@ -1,4 +1,10 @@
 ## calc_AccordDisc : calculate Accordance and Discordance as in Meskaldji et al 2016 (NeuroImage: Clinical)
+#
+# Based on:
+#    D.-E. Meskaldji, M. G. Preti, T. Bolton, M.-L. Montandon, C. K. Rodriguez, S. Morgenthaler, P. Giannakopoulos, S. Haller, D. Van De Ville.
+#    Prediction of Long-Term Memory Scores in MCI Based on Resting-State fMRI   
+#    Neuroimage: Clinical, 2016, 12, 785-795
+#
 # Input is:
 #   1) a Numpy Array where each column is a time series and each row is a time point
 #   2) an optional threshold used to binarie the time series (this is optional;
