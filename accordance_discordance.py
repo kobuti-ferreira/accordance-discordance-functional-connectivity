@@ -26,22 +26,17 @@ def calc_AccordDisc(ts, quantileThreshold = 0.8, verbose=True):
     if verbose: print("Calculating Accordance and Discordance")
     
     numTimePoints, numTS = ts.shape
-    if verbose: print( "Input: number of time series = " + str(numTS) )
-    if verbose: print( "Input: number of time points = " + str(numTimePoints) )
-    if verbose: print("Using quantile threshold = " + str(quantileThreshold))
+    if verbose: print(f"Input: number of time series = {numTS}")
+    if verbose: print(f"Input: number of time points = {numTimePoints}")
+    if verbose: print(f"Using quantile threshold = {quantileThreshold}")
 
     ## binarize the time-series
     # get upper and lower limits
     ul = np.quantile(ts, quantileThreshold, axis=0)
     ll = np.quantile(ts, 1 - quantileThreshold, axis=0)
-    
-    # repeat the limits to match the shape of ts
-    ul = np.tile(ul, (numTimePoints, 1))
-    ll = np.tile(ll, (numTimePoints, 1))
-    
-    # binarize the time-series
-    ul_ts = np.where(ts > ul, 1, 0)
-    ll_ts = np.where(ts < ll, -1, 0)
+    # apply upper and lower limits
+    ul_ts = (ts > ul[np.newaxis, :]).astype(int)
+    ll_ts = (ts < ll[np.newaxis, :]).astype(int) * -1
     
     ### Calculate Accordance and Discordance
     # containers
