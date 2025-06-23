@@ -21,6 +21,7 @@ def calc_AccordDisc(ts, quantileThreshold = 0.8, verbose=True):
     ts = np.subtract(ts, np.median(ts, axis=0))
     # Normalize by dividing by the median absolute deviation (MAD)
     mad = np.median(np.abs(ts - np.median(ts, axis=0)), axis=0)
+    mad[mad == 0] = np.finfo(np.float32).eps # avoid division by zero
     ts = np.divide(ts, mad)
     
     if verbose: print("Calculating Accordance and Discordance")
@@ -58,14 +59,13 @@ def calc_AccordDisc(ts, quantileThreshold = 0.8, verbose=True):
     denominators = np.outer(sigma_all, sigma_all)
     # Avoid division by zero
     denominators[denominators == 0] = np.finfo(np.float32).eps
+
+    # calculate unnormalized accordance and discordance between all possible pairs of time series
+    num_accordances = ul_ts.T @ ul_ts + ll_ts.T @ ll_ts
+    num_discordances = ul_ts.T @ ll_ts + ll_ts.T @ ul_ts
+    # normalize
+    accordances = num_accordances / denominators
+    discordances = num_discordances / denominators
     
-    ## loop through all possible pairs of regions 
-    for i in range(numTS):
-        for j in range(numTS):
-            denominator = denominators_all[i, j]
-            accordance = ( (ul_ts[:,i] @ ul_ts[:,j]) + (ll_ts[:,i] @ ll_ts[:,j]) ) / denominator
-            discordance = ( (ul_ts[:,i] @ ll_ts[:,j]) + (ll_ts[:,i] @ ul_ts[:,j]) ) / denominator
-            accordance_all[i, j] = accordance
-            discordance_all[i, j] = discordance
     if verbose: print('Done calculating Accordance and Discordance')
-    return accordance_all, discordance_all
+    return accordances, discordances
