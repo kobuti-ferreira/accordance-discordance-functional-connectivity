@@ -53,11 +53,9 @@ def calc_AccordDisc(ts, quantileThreshold = 0.8, verbose=True):
     sigma_all = np.sqrt(scalar_product_ul_ts + scalar_product_ll_ts)
     
     ## Prepare all possible denominators
-    # Denominator of time series pair i and j = all_sigmas[i] * all_sigmas[j]
-    #     while all_sigmas[i] = sqrt_sum_scalar_product_ul_ll[i]
-    # So to get all possible denominators, calculate the outer product of
-    #      sqrt_sum_scalar_product_ul_ll by itself
-    denominators_all = np.outer(sigma_all, sigma_all)    
+    # Denominator of time series pair i and j = sigma_all[i] * sigma_all[j]
+    # So the outer product of sigma_all by itself calculates all denominators
+    denominators = np.outer(sigma_all, sigma_all)    
     
     ## loop through all possible pairs of regions 
     for i in range(numTS):
