@@ -49,10 +49,8 @@ def calc_AccordDisc(ts, quantileThreshold = 0.8, verbose=True):
     #       the sum of element-wise square)
     scalar_product_ul_ts = np.sum(np.square(ul_ts), axis=0)
     scalar_product_ll_ts = np.sum(np.square(ll_ts), axis=0)
-    # sum of scalar products of ul and ll
-    sum_scalar_product_ul_ll = scalar_product_ul_ts + scalar_product_ll_ts
     # square root of the sum of scalar products of ul and ll
-    sigma_all = np.sqrt(sum_scalar_product_ul_ll)
+    sigma_all = np.sqrt(scalar_product_ul_ts + scalar_product_ll_ts)
     
     ## Prepare all possible denominators
     # Denominator of time series pair i and j = all_sigmas[i] * all_sigmas[j]
