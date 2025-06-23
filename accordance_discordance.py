@@ -16,6 +16,7 @@
 import numpy as np
 
 def calc_AccordDisc(ts, quantileThreshold = 0.8, verbose=True):
+    ts = ts.astype(np.float32)
     ## Median-center and normalize the time-series as in Meskaldji et al 2016
     # Median-centering
     ts = np.subtract(ts, np.median(ts, axis=0))
@@ -23,27 +24,22 @@ def calc_AccordDisc(ts, quantileThreshold = 0.8, verbose=True):
     mad = np.median(np.abs(ts - np.median(ts, axis=0)), axis=0)
     mad[mad == 0] = np.finfo(np.float32).eps # avoid division by zero
     ts = np.divide(ts, mad)
-    
-    if verbose: print("Calculating Accordance and Discordance")
-    
-    numTimePoints, numTS = ts.shape
-    if verbose: print(f"Input: number of time series = {numTS}")
-    if verbose: print(f"Input: number of time points = {numTimePoints}")
-    if verbose: print(f"Using quantile threshold = {quantileThreshold}")
+
+    if verbose:
+        print("Calculating Accordance and Discordance")
+        print(f"Input: number of time series = {ts.shape[1]}")
+        print(f"Input: number of time points = {ts.shape[0]}")
+        print(f"Using quantile threshold = {quantileThreshold}")
 
     ## binarize the time-series
     # get upper and lower limits
     ul = np.quantile(ts, quantileThreshold, axis=0)
     ll = np.quantile(ts, 1 - quantileThreshold, axis=0)
     # apply upper and lower limits
-    ul_ts = (ts > ul[np.newaxis, :]).astype(int)
-    ll_ts = (ts < ll[np.newaxis, :]).astype(int) * -1
+    ul_ts = (ts > ul[np.newaxis, :]).astype(int).astype(np.int8)
+    ll_ts = (ts < ll[np.newaxis, :]).astype(int).astype(np.int8) * -1
     
-    ### Calculate Accordance and Discordance
-    # containers
-    accordance_all = np.empty((numTS, numTS))
-    discordance_all = np.empty((numTS, numTS))
-    
+    ### Calculate Accordance and Discordance   
     ## Prepare parts of the denominators
     # scalar products of each column by itself in ul_ts and ll_ts
     # (obs: the scalar product of each column by itself is the same as
@@ -56,13 +52,13 @@ def calc_AccordDisc(ts, quantileThreshold = 0.8, verbose=True):
     ## Prepare all possible denominators
     # Denominator of time series pair i and j = sigma_all[i] * sigma_all[j]
     # So the outer product of sigma_all by itself calculates all denominators
-    denominators = np.outer(sigma_all, sigma_all)
+    denominators = np.outer(sigma_all, sigma_all).astype(np.float32)
     # Avoid division by zero
     denominators[denominators == 0] = np.finfo(np.float32).eps
 
     # calculate unnormalized accordance and discordance between all possible pairs of time series
-    num_accordances = ul_ts.T @ ul_ts + ll_ts.T @ ll_ts
-    num_discordances = ul_ts.T @ ll_ts + ll_ts.T @ ul_ts
+    num_accordances = (ul_ts.T @ ul_ts + ll_ts.T @ ll_ts).astype(np.float32)
+    num_discordances = (ul_ts.T @ ll_ts + ll_ts.T @ ul_ts).astype(np.float32)
     # normalize
     accordances = num_accordances / denominators
     discordances = num_discordances / denominators
