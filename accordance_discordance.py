@@ -55,7 +55,9 @@ def calc_AccordDisc(ts, quantileThreshold = 0.8, verbose=True):
     ## Prepare all possible denominators
     # Denominator of time series pair i and j = sigma_all[i] * sigma_all[j]
     # So the outer product of sigma_all by itself calculates all denominators
-    denominators = np.outer(sigma_all, sigma_all)    
+    denominators = np.outer(sigma_all, sigma_all)
+    # Avoid division by zero
+    denominator[denominator == 0] = np.finfo(np.float32).eps
     
     ## loop through all possible pairs of regions 
     for i in range(numTS):
