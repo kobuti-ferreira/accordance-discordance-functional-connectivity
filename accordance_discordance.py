@@ -57,7 +57,7 @@ def calc_AccordDisc(ts, quantileThreshold = 0.8, verbose=True):
     # So the outer product of sigma_all by itself calculates all denominators
     denominators = np.outer(sigma_all, sigma_all)
     # Avoid division by zero
-    denominator[denominator == 0] = np.finfo(np.float32).eps
+    denominators[denominators == 0] = np.finfo(np.float32).eps
     
     ## loop through all possible pairs of regions 
     for i in range(numTS):
